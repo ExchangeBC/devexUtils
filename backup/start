@@ -1,23 +1,7 @@
 #!/bin/bash
 
-if [ -z "$RETHINK" ]; then
-  echo "WARN: RETHINK is unset";
-fi
-
-if [ -z "$AWS_BUCKET" ]; then
-  echo "WARN: AWS_BUCKET is unset";
-fi
-
-if [ -z "$AWS_ACCESS_KEY_ID" ]; then
-  echo "WARN: AWS_ACCESS_KEY_ID is unset";
-fi
-
-if [ -z "$AWS_DEFAULT_REGION" ]; then
-  echo "WARN: AWS_DEFAULT_REGION is unset";
-fi
-
-if [ -z "$AWS_SECRET_ACCESS_KEY" ]; then 
-  echo "WARN: AWS_SECRET_ACCESS_KEY is unset";
+if [ -z "$MONGODB_URI" ]; then
+  echo "WARN: MONGODB_URI is unset";
 fi
 
 # Provide environment variables for the cron script

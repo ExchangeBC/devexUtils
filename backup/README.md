@@ -1,6 +1,6 @@
-# docker-rethink-to-s3
+# devex-backup
 
-Container that daily backs up a RethinkDB database to S3
+Container that daily backs up Mongo to a provisioned volume
 
 # How to Use
 
@@ -8,12 +8,8 @@ Basic usage is as follows:
 
 ```
 docker run \
-  -e "RETHINK=127.0.0.1:28015" \
-  -e "AWS_BUCKET=my-container" \
-  -e "AWS_ACCESS_KEY_ID=MYACCESSKEYID" \
-  -e "AWS_SECRET_ACCESS_KEY=3jk2kj3lkll+EXAMPLE/k213jl12k3kj213lkj213ll" \
-  -e "AWS_DEFAULT_REGION=ca-central-1" \
-  twostoryrobot/rethink-to-s3
+  -e "MONGODB_URI=mongodb://user:pass@host:port/database" \
+  backup
 ```
 
 This will start cron in the background which will run an upload script daily.

@@ -1,6 +1,6 @@
 
 #
-# Dockerfile for daily MongoDb backups
+# Dockerfile for daily MongoDB backups
 #
 
 FROM openshift/mongodb:3.2
@@ -19,4 +19,4 @@ COPY start .
 # Register crontab
 RUN crontab ./crontab
 
-CMD [ "/rethink-to-s3/start" ]
+CMD [ "/backup/start" ]

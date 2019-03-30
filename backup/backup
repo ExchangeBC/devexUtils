@@ -5,7 +5,11 @@ echo
 echo Backup triggered
 
 source /root/.envs
-mongodump --host 
-rethinkdb-dump -c $RETHINK
-aws s3 cp rethinkdb_dump*.tar.gz s3://$AWS_BUCKET/
-rm rethinkdb_dump*.tar.gz
+mkdir -p /backups/
+
+rm /backups/backup-$(date '+%u')*
+
+mongodump \
+  --gzip \
+  --uri $MONGODB_URI \
+  --archive /backups/backup-$(date '+%u (%Y-%m-%dT%H:%M:%S)').gz

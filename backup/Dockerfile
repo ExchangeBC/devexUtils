@@ -8,8 +8,7 @@ MAINTAINER Chris Foster chris.foster@twostoryrobot.com
 WORKDIR /backup
 
 # Install cron
-RUN apt-get update \
-    && yum install cron 
+RUN yum install cron
 
 # Add files
 COPY crontab .

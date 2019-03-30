@@ -29,8 +29,12 @@ ARG GOCROND_VERSION=0.6.2
 ADD https://github.com/$SOURCE_REPO/go-crond/releases/download/$GOCROND_VERSION/go-crond-64-linux \
     /usr/bin/go-crond
 
+# Output directory
+VOLUME /backups
+
 # Adjust permissions for user-level
-RUN chmod ug+x /usr/bin/go-crond \
+RUN chmod ug+x /usr/bin/go-crond 
+ && chmod ug+w /backups/
  && usermod -g root backup
 
 # Add project files
@@ -40,8 +44,5 @@ COPY start .
 
 # Run as user account
 USER backup
-
-# Output directory
-VOLUME /backups
 
 CMD [ "/opt/backup/start" ]

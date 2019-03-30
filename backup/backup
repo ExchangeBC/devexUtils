@@ -1,0 +1,11 @@
+#!/bin/bash
+# Perform the backup
+
+echo
+echo Backup triggered
+
+source /root/.envs
+mongodump --host 
+rethinkdb-dump -c $RETHINK
+aws s3 cp rethinkdb_dump*.tar.gz s3://$AWS_BUCKET/
+rm rethinkdb_dump*.tar.gz

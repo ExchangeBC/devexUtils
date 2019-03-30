@@ -1,18 +1,26 @@
 {
-  "name": "scrubber",
+  "name": "devex-exporter",
   "version": "1.0.0",
-  "description": "",
-  "main": "./src/scrubber.js",
+  "description": "Download server for scrubbed database exports",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node ./src/scrubber.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Akiff Manji",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BCDevExchange/devexUtils.git"
+  },
+  "author": "Chris Foster <chris.foster@twostoryrobot.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/BCDevExchange/devexUtils/issues"
+  },
+  "homepage": "https://github.com/BCDevExchange/devexUtils#readme",
   "dependencies": {
-    "chalk": "^2.3.2",
+    "chalk": "^2.4.2",
+    "express": "^4.16.4",
     "faker": "^4.1.0",
-    "fs-extra": "^5.0.0",
-    "mongodb": "^3.0.5"
+    "fs-extra": "^7.0.1",
+    "mongodb": "^3.2.2"
   }
 }

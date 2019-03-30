@@ -335,5 +335,3 @@ module.exports.scrub = function() {
             process.exit(1);
         });
 };
-
-this.scrub();

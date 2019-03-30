@@ -7,8 +7,12 @@ FROM openshift/mongodb:3.2
 MAINTAINER Chris Foster chris.foster@twostoryrobot.com
 WORKDIR /backup
 
+# Default mongo container is not permissioned
+USER root
+
 # Install cron
-RUN yum install cron
+RUN yum -y install cron &&
+  yum clean all -y
 
 # Add files
 COPY crontab .

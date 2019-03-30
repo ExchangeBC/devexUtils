@@ -10,9 +10,10 @@ if (!process.env['DOWNLOAD_KEY']) {
   process.exit(1)
 }
 
-function handleDownload(req, res) {
+async function handleDownload(req, res) {
   const invalidKey = new Error('Invalid key provided')
   if (process.env['DOWNLOAD_KEY'] != req.query.key) throw invalidKey
+  await scrubber.scrub()
   res.download('/tmp/export.tar.gz')
 }
 
@@ -33,8 +34,5 @@ const app = express()
 app.get('/download', handleDownload)
 app.all('*', handleInvalidRequests)
 app.use(handleError)
-
-const threeHours = 3*60*60*1000
-setInterval(threeHours, scrubber.scrub)
 
 module.exports = app

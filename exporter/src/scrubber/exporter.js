@@ -11,7 +11,7 @@ const exportDB = function(src) {
         '--host', src.db.hostname,
         '--port', src.db.port,
         '--db', src.db.name,
-        '--out', '/tmp',
+        '--archive', '/tmp/export.gz',
         '--gzip'
     ];
     if (src.db.username && src.db.password) {

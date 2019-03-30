@@ -12,7 +12,7 @@ module.exports.import = function(dest) {
         '--host', dest.db.hostname,
         '--port', dest.db.port,
         '--db', dest.db.name,
-        '--dir', `/tmp/${dest.db.name}`,
+        '--archive', `/tmp/export.gz`,
         '--gzip'
     ];
     if (dest.db.username && dest.db.password) {

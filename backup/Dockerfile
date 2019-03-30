@@ -11,7 +11,7 @@ WORKDIR /backup
 USER root
 
 # Install cron
-RUN yum -y install cron \
+RUN yum -y install cronie \
   && yum clean all -y
 
 # Add files

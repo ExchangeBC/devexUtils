@@ -1,1 +1,1 @@
-17 4 * * * /backup/backup >> /var/log/cron.log 2>&1
+* * * * * default /opt/backup/backup

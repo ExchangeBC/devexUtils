@@ -5,10 +5,7 @@ if [ -z "$MONGODB_URI" ]; then
 fi
 
 # Provide environment variables for the cron script
-env | sed 's/^\(.*\)$/export \1/g' > /opt/backup/.envs
+env | sed 's/^\(.*\)$/export \1/g' > /tmp/.envs
 
 # Start cron
-/usr/sbin/cron
-
-echo Started >> /var/log/cron.log
-tail -f /var/log/cron.log
+/usr/bin/go-crond -v --allow-unprivileged /opt/backup/crontab

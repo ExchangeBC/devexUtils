@@ -33,8 +33,8 @@ ADD https://github.com/$SOURCE_REPO/go-crond/releases/download/$GOCROND_VERSION/
 VOLUME /backups
 
 # Adjust permissions for user-level
-RUN chmod ug+x /usr/bin/go-crond 
- && chmod ug+w /backups/
+RUN chmod ug+x /usr/bin/go-crond  \
+ && chmod ug+w /backups/ \
  && usermod -g root backup
 
 # Add project files

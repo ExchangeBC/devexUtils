@@ -5,7 +5,7 @@
 
 FROM ubuntu:18.04
 MAINTAINER Chris Foster chris.foster@twostoryrobot.com
-WORKDIR /backup
+WORKDIR /opt/backup
 
 # Install basic deps
 RUN apt-get update \
@@ -31,4 +31,7 @@ COPY start .
 # Register crontab
 RUN crontab ./crontab
 
-CMD [ "/backup/start" ]
+# Output directory
+VOLUME /backups
+
+CMD [ "/opt/backup/start" ]

@@ -4,8 +4,7 @@
 echo
 echo Backup triggered
 
-source /root/.envs
-mkdir -p /backups/
+source /opt/backup/.envs
 
 rm /backups/backup-$(date '+%u')*
 

@@ -6,7 +6,7 @@ echo Backup triggered
 
 source /tmp/.envs
 
-rm /backups/backup-$(date '+%u')*
+rm /backups/backup-$(date '+%u')* 2> /dev/null
 
 mongodump \
   --gzip \

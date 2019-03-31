@@ -10,11 +10,10 @@ if (!process.env['DOWNLOAD_KEY']) {
   process.exit(1)
 }
 
-async function handleDownload(req, res) {
+function handleDownload(req, res) {
   const invalidKey = new Error('Invalid key provided')
   if (process.env['DOWNLOAD_KEY'] != req.query.key) throw invalidKey
-  await scrubber.scrub()
-  res.download('/tmp/export.tar.gz')
+  scrubber.scrub().then(() => res.download('/tmp/export.tar.gz'))
 }
 
 function handleInvalidRequests(req, res) {

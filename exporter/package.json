@@ -2,8 +2,8 @@
   "name": "devex-exporter",
   "version": "1.0.0",
   "description": "Download server for scrubbed database exports",
-  "main": "src/index.js",
   "scripts": {
+    "start": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

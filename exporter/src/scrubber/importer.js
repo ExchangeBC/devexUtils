@@ -20,9 +20,9 @@ module.exports.import = function(dest) {
     }
     mongorestoreCMD = mongorestoreCMD.join(' ');
 
-    const infoStr = `Restorting to ${dest.db.name} from /tmp/${dest.db.name}`;
+    const infoStr = `Restorting to ${dest.db.name} from /tmp/`;
     const successStr = `Restored ${dest.db.name}`;
-    const errStr = `Error restoring to ${dest.db.name} from /tmp/${dest.db.name}`;
+    const errStr = `Error restoring to ${dest.db.name} from /tmp/`;
 
     return new Promise((resolve, reject) => {
         console.log(chalk.cyan(infoStr));

@@ -29,6 +29,7 @@ RUN curl https://deb.nodesource.com/setup_10.x | bash - \
 
 WORKDIR /opt/app
 COPY . /opt/app
+RUN ls
 RUN npm ci
 
 CMD ["npm", "start"]

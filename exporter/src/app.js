@@ -14,9 +14,7 @@ function handleDownload(req, res, next) {
   req.setTimeout(1000*60*15)
   const invalidKey = new Error('Invalid key provided')
   if (process.env['DOWNLOAD_KEY'] != req.query.key) throw invalidKey
-  scrubber.scrub()
-  .then(() => res.download('/tmp/export.tar.gz'))
-  .fail(err => next(err))
+  scrubber.scrub().then(() => res.download('/tmp/export.tar.gz'), next)
 }
 
 function handleInvalidRequests(req, res) {

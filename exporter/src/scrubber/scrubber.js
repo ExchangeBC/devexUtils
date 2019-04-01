@@ -212,6 +212,7 @@ const scrubDB = function(collections) {
 
                 const getReplacementsForCollection = (collection) => {
                     const replacementFn = removableFields[collection.collectionName];
+                    console.log('COL NAME', collection.collectionName);
                     if (replacementFn && typeof replacementFn === 'function') {
                         return replacementFn();
                     }

@@ -329,7 +329,7 @@ module.exports.scrub = function() {
             console.error(chalk.bold.red(err));
             return dropDB()
                 .then(() => closeClient())
-                .then(() => throw err);
+                .then(() => { throw err });
         })
         .catch(err => {
             /**

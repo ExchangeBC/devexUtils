@@ -212,7 +212,6 @@ const scrubDB = function(collections) {
 
                 const getReplacementsForCollection = (collection) => {
                     const replacementFn = removableFields[collection.collectionName];
-                    console.log('COL NAME', collection.collectionName);
                     if (replacementFn && typeof replacementFn === 'function') {
                         return replacementFn();
                     }
@@ -223,8 +222,8 @@ const scrubDB = function(collections) {
                 const removableFieldNames = Object.keys(replacements) || [];
 
                 if (removableFieldNames.length == 0) {
-                  console.log('Skipping collection', collection);
-                  return;
+                  console.log('Skipping collection', collection.collectionName);
+                  return resolve();
                 }
 
                 /**

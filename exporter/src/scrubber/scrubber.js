@@ -242,6 +242,7 @@ const scrubDB = function(collections) {
                 }
 
                 const bulkWriteQueries = [];
+                console.log(JSON.stringify(filterQuery))
                 const stream = collection.find(filterQuery).stream();
 
                 stream.on('data', function(document) {

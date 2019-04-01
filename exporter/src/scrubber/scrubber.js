@@ -172,7 +172,7 @@ const connectDB = function() {
     .catch(err => {
         console.error(chalk.bold.red(`Failed to connect to DB ${DEST_DB_NAME}`));
         console.error(err);
-        process.exit(1);
+        throw err;
     });
 }
 
@@ -221,6 +221,11 @@ const scrubDB = function(collections) {
 
                 const replacements = getReplacementsForCollection(collection);
                 const removableFieldNames = Object.keys(replacements) || [];
+
+                if (removableFieldNames.length == 0) {
+                  console.log('Skipping collection', collection);
+                  return;
+                }
 
                 /**
                  * Setup filter query for updateMany
@@ -313,8 +318,7 @@ module.exports.scrub = function() {
         .then(() => exporter.export(config.dest))
         .then(() => {
             return dropDB()
-                .then(() => closeClient())
-                .then(() => process.exit(0));
+                .then(() => closeClient());
         })
         .catch(err => {
             /**
@@ -325,7 +329,7 @@ module.exports.scrub = function() {
             console.error(chalk.bold.red(err));
             return dropDB()
                 .then(() => closeClient())
-                .then(() => process.exit(1));
+                .then(() => throw err);
         })
         .catch(err => {
             /**
@@ -333,6 +337,6 @@ module.exports.scrub = function() {
              * Stop the script immediately with an error code.
              */
             console.error(chalk.bold.red(err));
-            process.exit(1);
+            throw err;
         });
 };

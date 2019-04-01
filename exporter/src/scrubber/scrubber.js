@@ -223,7 +223,7 @@ const scrubDB = function(collections) {
 
                 if (removableFieldNames.length == 0) {
                   console.log('Skipping collection', collection.collectionName);
-                  return resolve();
+                  return resolve([]);
                 }
 
                 /**
@@ -280,6 +280,12 @@ const scrubDB = function(collections) {
                 /**
                 * Attempt updateMany
                 */
+                if (operations.length == 0) {
+                  return {
+                    modifiedCount: 0,
+                    matchedCount: 0
+                  }
+                };
                 return collection.bulkWrite(operations);
             })
         }).then(result => {

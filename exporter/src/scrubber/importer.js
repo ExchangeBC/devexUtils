@@ -12,6 +12,7 @@ module.exports.import = function(dest) {
         '--host', dest.db.hostname,
         '--port', dest.db.port,
         `--nsInclude '${dest.db.name}.*'`,
+        '--authenticationDatabase', dest.db.name,
         '--archive=/tmp/export.gz',
         '--gzip'
     ];

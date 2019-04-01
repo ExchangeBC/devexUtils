@@ -11,7 +11,7 @@ module.exports.import = function(dest) {
         'mongorestore',
         '--host', dest.db.hostname,
         '--port', dest.db.port,
-        '--db', dest.db.name,
+        `--nsInclude '${dest.db.name}.*'`,
         '--archive=/tmp/export.gz',
         '--gzip'
     ];

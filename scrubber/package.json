@@ -20,6 +20,7 @@
     "chalk": "^2.4.2",
     "express": "^4.16.4",
     "express-async-handler": "^1.1.4",
+    "express-fileupload": "^1.1.4",
     "faker": "^4.1.0",
     "mongodb": "^3.2.2"
   }

@@ -8,13 +8,13 @@ const MongoClient = require('mongodb').MongoClient
 const mongoTools = require('./mongoTools')
 
 const tmpFile = '/tmp/tmp.gz'
-const outFile = '/tmp/scrubbed.gz'
 
 // Collections that don't contain sensitive data fields
 const collectionWhitelist = [
   'capabilities',
   'capabilityskills',
   'configuration',
+  'messagetemplates',
   'notifications',
   'projects',
   'sessions',
@@ -43,7 +43,7 @@ const scrubberMap = {
     contactPhone: faker.phone.phoneNumber(),
     website: '',
     orgImageURL: ''
-  })
+  }),
 
   profiles: () => ({
     github: '',
@@ -63,12 +63,12 @@ const scrubberMap = {
     businessContactName: faker.name.findName(),
     businessContactEmail: uniqueDefaultEmail(),
     businessContactPhone: faker.phone.phoneNumber()
-  }
+  }),
 
   users: () => ({
     firstName: uniqueFirstName(),
     lastName: uniqueLastName(),
-    displayName: `${firstName} ${lastName}`,
+    displayName: `${uniqueFirstName()} ${uniqueLastName()}`,
     username: uniqueUserName(),
     email: uniqueDefaultEmail(),
     address: faker.address.streetAddress(),
@@ -125,7 +125,7 @@ const uniqueUserName = (() => {
   return () => {
     let userName 
     do userName = faker.internet.userName()
-    while (userNames.has(userName)
+    while (userNames.has(userName))
     userNames.add(userName)
     return userName
   }
@@ -136,10 +136,11 @@ async function scrubCollections(collections) {
   const sensitiveCollections = collections
   .filter(c => collectionWhitelist.indexOf(c.collectionName) === -1)
 
-  console.log(`Found ${sensitiveCollections.length} sensitive collections`)
+  console.log('Found', sensitiveCollections.length, 'sensitive collections')
 
-  for (const collection of collections) {
+  for (const collection of sensitiveCollections) {
 
+    console.log('Scrubbing', collection.collectionName)
     const scrubbedFields = scrubberMap[collection.collectionName]()
     const fieldNames = Object.keys(scrubbedFields)
 
@@ -154,7 +155,7 @@ async function scrubCollections(collections) {
     if (collection.collectionName === 'users') {
       const skippedUsers = ['admin', 'dev', 'gov', 'user']
       filterQuery.$and = skippedUsers.map(user => ({
-        username: { $ne: u } 
+        username: { $ne: user } 
       }))
     }
 
@@ -175,19 +176,19 @@ async function scrubCollections(collections) {
     // Update all of the documents as a single bulk request
     const result = await collection.bulkWrite(updates)
 
-    console.log(`\nCollection: ${collection.collectionName}`)
-    console.log(`Found ${result.matchedCount} sensitive entries`)
-    console.log(`Scrubbed ${result.modifiedCount} entries`)
+    console.log('\nCollection:', collection.collectionName)
+    console.log('Found', result.matchedCount, 'sensitive entries')
+    console.log('Scrubbed', result.modifiedCount, 'entries')
 
   }
 
 }
 
-
-async function scrub(srcUri, tmpUri) {
+async function scrubber(srcUri, tmpUri, outFile) {
+  const opts = { useNewUrlParser: true }
+  const client = await MongoClient.connect(tmpUri, opts)
   try {
     console.log('Scrubbing database')
-    const client = await MongoClient.connect(tmpUri)
     await client.db().dropDatabase()
     await mongoTools.dump(srcUri, tmpFile)
     await mongoTools.restore(tmpFile, tmpUri)
@@ -204,4 +205,4 @@ async function scrub(srcUri, tmpUri) {
   }
 }
 
-module.exports = scrub
+module.exports = scrubber

@@ -1,7 +1,7 @@
 {
-  "name": "devex-exporter",
+  "name": "devex-scrubber",
   "version": "1.0.0",
-  "description": "Download server for scrubbed database exports",
+  "description": "Download / upload server for scrubbed database exports",
   "scripts": {
     "start": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"

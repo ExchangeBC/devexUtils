@@ -1,6 +1,6 @@
 
 #
-# Dockerfile for exporter + scrubber application
+# Dockerfile for scrubber application
 #
 
 FROM ubuntu:18.04

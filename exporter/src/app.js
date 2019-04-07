@@ -3,18 +3,15 @@
  */
 
 const express = require('express')
-const scrubber = require('./scrubber/scrubber')
+const asyncHandler = require('express-async-handler')
+const scrubber = require('./scrubber')
 
-if (!process.env['DOWNLOAD_KEY']) {
-  console.error('No DOWNLOAD_KEY set')
-  process.exit(1)
-}
-
-function handleDownload(req, res, next) {
+async function handleDownload(req, res) {
   req.setTimeout(1000*60*15)
   const invalidKey = new Error('Invalid key provided')
   if (process.env['DOWNLOAD_KEY'] != req.query.key) throw invalidKey
-  scrubber.scrub().then(() => res.download('/tmp/export.gz'), next)
+  await scrubber()
+  res.download('/tmp/export.gz')
 }
 
 function handleInvalidRequests(req, res) {
@@ -31,7 +28,7 @@ function handleError(err, req, res, next) {
 }
 
 const app = express()
-app.get('/download', handleDownload)
+app.get('/download', asyncHandler(handleDownload))
 app.all('*', handleInvalidRequests)
 app.use(handleError)
 

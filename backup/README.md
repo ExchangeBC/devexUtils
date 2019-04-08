@@ -1,15 +1,15 @@
-# devex-backup
+# devexutils-backup
 
-Container that daily backs up Mongo to a provisioned volume
+Container that daily backs up Mongo to a provisioned volume.
 
-# How to Use
+## How to use
 
 Basic usage is as follows:
 
 ```
 docker run \
   -e "MONGODB_URI=mongodb://user:pass@host:port/database" \
-  backup
+  devexutils-backup
 ```
 
 This will start cron in the background which will run an upload script daily.

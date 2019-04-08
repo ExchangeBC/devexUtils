@@ -8,12 +8,10 @@ const asyncHandler = require('express-async-handler')
 const mongoTools = require('./mongoTools')
 const scrubber = require('./scrubber')
 
-const fileSize = process.env.FILESIZE || Infinity
-
 const files = 1
 const abortOnLimit = true
 const safeFileNames = true
-const limits = { fileSize, files }
+const limits = { files }
 const options = { safeFileNames, limits, abortOnLimit }
 
 const notProvided = new Error('File not provided')
@@ -29,7 +27,7 @@ async function handleImport(req, res) {
   await req.files.data.mv(inFile)
   await mongoTools.restore(inFile, process.env['DB_URI'])
   console.log(`[${req.ip}] [201] Import successful`)
-  res.status(201).send('Upload successful') 
+  res.status(201).send('Upload successful\n') 
 }
 
 async function handleExport(req, res) {
@@ -37,7 +35,7 @@ async function handleExport(req, res) {
   if (process.env['KEY'] != req.query.key) throw invalidKey
   await scrubber(process.env['DB_URI'], process.env['TMP_DB_URI'], outFile)
   console.log(`[${req.ip}] [200] Export successful`)
-  res.download('/tmp/export.gz')
+  res.download(outFile)
 }
 
 async function handleInvalidRequests(req, res) {

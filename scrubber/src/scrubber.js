@@ -25,6 +25,28 @@ const collectionWhitelist = [
 
 const scrubberMap = {
 
+  attachments: () => ({
+    name: faker.system.commonFileName()
+  }),
+
+  messagearchives: () => ({
+    userEmail: uniqueDefaultEmail(),
+    messageBody: '',
+    messageShort: '',
+    messageTitle: '',
+    emailBody: '',
+    emailSubject: ''
+  }),
+
+  messages: () => ({
+    userEmail: uniqueDefaultEmail(),
+    messageBody: '',
+    messageShort: '',
+    messageTitle: '',
+    emailBody: '',
+    emailSubject: ''
+  }),
+
   opportunities: () => ({
     proposalEmail: uniqueDefaultEmail()
   }),
@@ -102,8 +124,8 @@ const uniqueFirstName = (() => {
   const firstNames = new Set()
   return () => {
     let firstName
-    do firstname = faker.name.firstName()
-    while (firstNames.has(firstname))
+    do firstName = faker.name.firstName()
+    while (firstNames.has(firstName))
     firstNames.add(firstName)
     return firstName
   }

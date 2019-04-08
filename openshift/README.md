@@ -27,6 +27,9 @@ SOURCE_REPOSITORY_URL=https://github.com/BCDevExchange/devexUtils
 SOURCE_REPOSITORY_REF=master
 ```
 
+You might have to manually trigger both builds at this point, as the template 
+does not automatically configure webhooks for you. 
+
 Now, you can deploy the environment template:
 
 ```

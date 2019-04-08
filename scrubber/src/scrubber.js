@@ -211,7 +211,6 @@ async function scrubber(srcUri, tmpUri, outFile) {
   const client = await MongoClient.connect(tmpUri, opts)
   try {
     console.log('Scrubbing database')
-    await client.db().dropDatabase()
     await mongoTools.dump(srcUri, tmpFile)
     await mongoTools.restore(tmpFile, tmpUri)
     const collections = await client.db().collections()

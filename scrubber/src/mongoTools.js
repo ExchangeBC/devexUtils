@@ -6,9 +6,17 @@
 const url = require('url')
 const util = require('util')
 const childProcess = require('child_process')
+const MongoClient = require('mongodb').MongoClient
 
 const exec = util.promisify(childProcess.exec)
 const opts = { maxBuffer: 1024 * 1024 }
+
+async function drop(uri) {
+  const opts = { useNewUrlParser: true }
+  const client = await MongoClient.connect(uri, opts)
+  await client.db().dropDatabase()
+  await client.close()
+}
 
 async function restore(loc, uri) {
   const db = url.parse(uri).pathname.substr(1)
@@ -20,6 +28,7 @@ async function restore(loc, uri) {
       --archive=${loc} \
       --gzip
   `
+  await drop(uri)
   console.log('Restoring to', uri)
   const { stdout, stderr } = await exec(command, opts)
   if (stdout) console.log('== STDOUT ==', '\n' + stdout)

@@ -1,0 +1,83 @@
+
+#
+# DevEx Utils Build Template 
+#
+
+kind: Template
+apiVersion: v1
+metadata:
+  name: devexutils-build-template
+
+labels:
+  template: devexutils-build
+
+parameters:
+  - name: SUFFIX
+    description: 'The suffix for the resources (e.g. -staging)'
+  - name: TAG
+    value: latest
+    description: 'The image tag to generate (e.g. latest)'
+  - name: SOURCE_REPOSITORY_URL
+    value: https://github.com/BCDevExchange/devexUtils
+    description: 'The repository to load the image sources from'
+  - name: SOURCE_REPOSITORY_REF
+    value: master
+    description: 'The git ref to load the image sources from'
+
+objects:
+
+  - apiVersion: v1
+    kind: ImageStream
+    metadata:
+      name: devexutils-backup${SUFFIX}
+
+  - apiVersion: v1
+    kind: ImageStream
+    metadata:
+      name: devexutils-scrubber${SUFFIX}
+
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      name: devexutils-backup${SUFFIX}
+    spec:
+      output:
+        to:
+          kind: ImageStreamTag
+          name: devexutils-backup${SUFFIX}:${TAG}
+      runPolicy: Serial
+      source:
+        contextDir: backup
+        git:
+          ref: ${SOURCE_REPOSITORY_REF}
+          uri: ${SOURCE_REPOSITORY_URL}
+        type: Git
+      strategy:
+        dockerStrategy:
+          from:
+            kind: ImageStreamTag
+            name: ubuntu:18.04
+        type: Docker
+
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      name: devexutils-scrubber${SUFFIX}
+    spec:
+      output:
+        to:
+          kind: ImageStreamTag
+          name: devexutils-scrubber${SUFFIX}:${TAG}
+      runPolicy: Serial
+      source:
+        contextDir: scrubber
+        git:
+          ref: ${SOURCE_REPOSITORY_REF}
+          uri: ${SOURCE_REPOSITORY_URL}
+        type: Git
+      strategy:
+        dockerStrategy:
+          from:
+            kind: ImageStreamTag
+            name: ubuntu:18.04
+        type: Docker

@@ -43,3 +43,8 @@ You can perform an import with curl as well:
 ```
 > curl -XPOST -F 'data=@scrubbed.gz' https://mydevex.dev/import?key=secure_key
 ```
+
+**Warning:** Importing will drop the configured database at `DB_URI` and 
+replace it with the newly uploaded, and likely scrubbed, content. If you want
+to ensure this is not possible, and make the application export-only, configure 
+Mongo permissions such that the user in `DB_URI` has read-only permission.

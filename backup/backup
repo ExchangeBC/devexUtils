@@ -1,0 +1,14 @@
+#!/bin/bash
+# Perform the backup
+
+echo
+echo Backup triggered
+
+source /tmp/.envs
+
+rm /backups/backup-$(date '+%u')* 2> /dev/null
+
+mongodump \
+  --gzip \
+  --uri $MONGODB_URI \
+  --archive="/backups/backup-$(date '+%u (%Y-%m-%dT%H:%M:%S)').gz"

@@ -1,0 +1,252 @@
+
+#
+# DevEx Utils Environment Template 
+#
+
+kind: Template
+apiVersion: v1
+metadata:
+  name: devexutils-environment-template
+
+labels:
+  template: devexutils-environment
+
+parameters:
+  - name: SUFFIX
+    description: 'The suffix for the resources (e.g. -staging)'
+  - name: HOSTNAME
+    description: 'The hostname for the scrubber endpoint'
+  - name: MONGODB_URI
+    description: 'The URI for the BCDevEx environment mongo instance'
+  - name: SCRUBBER_KEY
+    from: '[A-Z0-9]{12}'
+    generate: expression
+    description: 'The key required to download or upload exports'
+  - name: BACKUP_CAPACITY
+    value: 35Gi
+    description: 'The amount of space for one week of daily backups (e.g. 35Gi)'
+  - name: IMAGESTREAM_SUFFIX
+    description: 'The suffix used in the build template, if one was chosen'
+  - name: IMAGESTREAM_NAMESPACE
+    description: 'The name of your tools namespace, where the images are'
+  - name: IMAGESTREAM_TAG
+    value: latest
+    description: 'The image tag used in the build template' 
+  - name: TMP_MONGO_PASS
+    from: '[A-Z0-9]{12}'
+    generate: expression
+    description: 'The internal ephemeral MongoDB password'
+
+objects:
+
+  # PVC for backups
+
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: devexutils-backup-pvc${SUFFIX}
+    spec:
+      accessModes:
+        - ReadWriteMany
+      resources:
+        requests:
+          storage: ${BACKUP_CAPACITY}
+
+  # Services
+
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: devexutils-scrubber${SUFFIX}
+    spec:
+      ports:
+        - name: web
+          port: 3000
+          protocol: TCP
+          targetPort: 3000
+      selector:
+        name: devexutils-scrubber${SUFFIX}
+
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: devexutils-mongodb${SUFFIX}
+    spec:
+      ports:
+        - name: mongo
+          port: 27017
+          protocol: TCP
+          targetPort: 27017
+      selector:
+        name: devexutils-mongodb${SUFFIX}
+
+  # Deployment Configs
+
+  - apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      name: devexutils-backup${SUFFIX}
+    spec:
+      replicas: 1
+      strategy:
+        type: Rolling
+      selector: 
+        name: devexutils-backup${SUFFIX}
+      template:
+        metadata:
+          labels:
+            name: devexutils-backup${SUFFIX}
+        spec:
+          containers:
+            - name: devexutils-backup${SUFFIX}
+              imagePullPolicy: Always
+              env:
+                - name: MONGODB_URI
+                  value: ${MONGODB_URI}
+              volumeMounts:
+                - mountPath: /backups/
+                  name: devexutils-backup-data${SUFFIX}
+          restartPolicy: Always
+          volumes:
+            - name: devexutils-backup-data${SUFFIX}
+              persistentVolumeClaim:
+                claimName: devexutils-backup-pvc${SUFFIX}
+      triggers:
+        - type: ConfigChange
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - devexutils-backup${SUFFIX}
+            from:
+              kind: ImageStreamTag
+              name: devexutils-backup${IMAGESTREAM_SUFFIX}:${IMAGESTREAM_TAG}
+              namespace: ${IMAGESTREAM_NAMESPACE}
+          type: ImageChange
+
+  - apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      name: devexutils-scrubber${SUFFIX}
+    spec:
+      replicas: 1
+      strategy:
+        type: Rolling
+      selector: 
+        name: devexutils-scrubber${SUFFIX}
+      template:
+        metadata:
+          labels:
+            name: devexutils-scrubber${SUFFIX}
+        spec:
+          containers:
+            - name: devexutils-scrubber${SUFFIX}
+              imagePullPolicy: Always
+              env:
+                - name: KEY
+                  value: ${SCRUBBER_KEY}
+                - name: DB_URI
+                  value: ${MONGODB_URI}
+                - name: TMP_DB_URI
+                  value: "mongodb://admin:${TMP_MONGO_PASS}@devexutils-mongodb\
+                          ${SUFFIX}/tmp?authSource=admin"
+              ports:
+                - containerPort: 3000
+                  protocol: TCP
+          restartPolicy: Always
+      triggers:
+        - type: ConfigChange
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - devexutils-scrubber${SUFFIX}
+            from:
+              kind: ImageStreamTag
+              name: devexutils-scrubber${IMAGESTREAM_SUFFIX}:${IMAGESTREAM_TAG}
+              namespace: ${IMAGESTREAM_NAMESPACE}
+          type: ImageChange
+
+  - apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      name: devexutils-mongodb${SUFFIX}
+    spec:
+      replicas: 1
+      strategy:
+        type: Recreate
+      selector: 
+        name: devexutils-mongodb${SUFFIX}
+      template:
+        metadata:
+          labels:
+            name: devexutils-mongodb${SUFFIX}
+        spec:
+          containers:
+            - imagePullPolicy: IfNotPresent
+              env:
+                - name: MONGODB_ADMIN_PASSWORD
+                  value: ${TMP_MONGO_PASS}
+              livenessProbe:
+                failureThreshold: 3
+                initialDelaySeconds: 30
+                periodSeconds: 10
+                successThreshold: 1
+                tcpSocket:
+                  port: 27017
+                timeoutSeconds: 1
+              name: devexutils-mongodb${SUFFIX}
+              ports:
+                - containerPort: 27017
+                  protocol: TCP
+              readinessProbe:
+                exec:
+                  command:
+                  - /bin/sh
+                  - -i
+                  - -c
+                  - mongo 127.0.0.1:27017/admin
+                    -u admin
+                    -p $MONGODB_ADMIN_PASSWORD
+                    --eval="quit()"
+                failureThreshold: 3
+                initialDelaySeconds: 3
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 1
+              volumeMounts:
+                - mountPath: /var/lib/mongodb/data
+                  name: devexutils-mongodb-data${SUFFIX}
+          restartPolicy: Always
+          volumes:
+            - emptyDir: {}
+              name: devexutils-mongodb-data${SUFFIX}
+      triggers:
+        - type: ConfigChange
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - devexutils-mongodb${SUFFIX}
+            from:
+              kind: ImageStreamTag
+              name: mongodb:3.2
+              namespace: openshift
+          type: ImageChange
+
+  # Routes
+  
+  - apiVersion: v1
+    kind: Route
+    metadata:
+      annotations:
+        haproxy.router.openshift.io/timeout: 15m
+      name: devexutils-scrubber${SUFFIX}
+    spec:
+      host: ${HOSTNAME}
+      port:
+        targetPort: web
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: edge
+      to:
+        kind: Service
+        name: devexutils-scrubber${SUFFIX}
+        weight: 100

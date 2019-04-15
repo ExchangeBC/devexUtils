@@ -1,106 +1,50 @@
-# Mongo DB Scrubber Utility
+# devexutils-scrubber
 
-A simple Node.js application that will connect to a MongoDB instance, copy a specified DB, scrub it clean of all sensitive information and create a dump of it in `/tmp`.
+This container provides the ability to export an existing BCDevEx database, 
+scrub it of all sensitive information, and then release it for download. This 
+can be used for generating a realistic dataset for use in staging and testing
+environments. It also provides an endpoint for importing the scrubbed archives 
+to a database.
 
-_**WARNING:** The utility will overwrite any existing dump that exists in `/tmp`. It will also overwrite any data that exists in the database copy that is being cleaned if it currently exists._
+## How to use
 
-This utility also comes with accompanying modules that can be used in standalone:
-* `exporter.js` - Exports a DB to `/tmp`. _Uses parameters specified in SRC section below or can be passed a configuration object._
-* `importer.js` - Imports a DB from `/tmp`. _Uses parameters specified in DEST section below or can be passed a configuration object._
+Basic usage is as follows:
 
-This utility requires the following dependencies:
-* Node.js 8+ (preferrably LTS)
-* mongo-tools
+```
+docker run \
+  --link mongo:mongo
+  -e DB_URI=mongodb://mongo:27017/devex
+  -e TMP_DB_URI=mongodb://tmpmongo:27107/tmp
+  -e KEY=secure_key
+  -p 3000:3000
+  devexutils-export
+```
 
-#### The following parameters should be defined as ENV variables specifying the DB to be scrubbed:
+The `DB_URI` is the database that will be exported from and imported to. The
+`TMP_DB_URI` is an emphemeral MongoDB database, to which the user must have 
+database admin privileges. The `TMP_DB_URI` should not be a production database
+as it may receive heavy burst loads during the export or import.
 
-### Specify a SRC MongoDB Database:
+The `KEY` is a secret parameter which should not be shared, as it allows uploads
+to the database specified by `DB_URI`.
 
-`SRC_MONGO_DB_NAME` _defaults to 'devex'_ \
-`SRC_MONGO_DB_HOSTNAME` _defaults to 'localhost'_ \
-`SRC_MONGO_DB_PORT` _defaults to '27017'_ \
-`SRC_MONGO_DB_BACKUP_DIRNAME` _defaults to 'devexbackup'_ \
-`SRC_MONGO_DB_USERNAME` _defaults to ''_ \
-`SRC_MONGO_DB_PASSWORD` _defaults to ''_
+## Generating a scrubbed export
 
-**IMPORTANT:**
-* `SRC_MONGO_DB_BACKUP_DIRNAME` needs to be the same as the name of the destination database that is being scrubbed.
-* Both `SRC_MONGO_DB_USERNAME` and `SRC_MONGO_DB_PASSWORD` need to be defined if the database requires authentication for connecting to. If either are missing, the script will attempt to connect to the database without authentication credentials.
-* If authentication credentials are defined, the user that the database connects with must have a minimum of `read` permissions on that database.
+You can perform an export with curl:
 
-### Specify a DEST MongoDB Database:
+```
+> curl https://mydevex.dev/export?key=secure_key --output scrubbed.gz
+```
 
-`DEST_MONGO_DB_NAME` _defaults to 'devexbackup'_ \
-`DEST_MONGO_DB_HOSTNAME` _defaults to 'localhost'_ \
-`DEST_MONGO_DB_PORT` _defaults to '27017'_ \
-`DEST_MONGO_DB_USERNAME` _defaults to ''_ \
-`DEST_MONGO_DB_PASSWORD` _defaults to ''_
+## Performing an import
 
-**IMPORTANT:**
-* Both `DEST_MONGO_DB_USERNAME` and `DEST_MONGO_DB_PASSWORD` need to be defined if the database requires authentication for connecting to. If either are missing, the script will attempt to connect to the database without authentication credentials.
-* If authentication credentials are defined, the user that the database connects with must have a minimum of `readWrite` permissions on that database. It is preferrable for the user to have `dbAdmin` permissions since the script will attempt to drop any temporal or intermediary databases that it may create.
+You can perform an import with curl as well:
 
-## Running the application
+```
+> curl -XPOST -F 'data=@scrubbed.gz' https://mydevex.dev/import?key=secure_key
+```
 
-Run `npm install && npm start` if node modules are not installed, otherwise run `npm start`.
-
-_For correspondence please email akiff.manji@gmail.com. or tag @amanji on GitHub_
-
-## Replaced Fields
-
-The following list indicates collections and the fields within them that are either replaced with a dummy placeholder, a default value or are completely removed (ie. set to '').
-
-* 'opportunities'
-    * 'proposalEmail': 'bcdevelopersexchange@gmail.com'
-* 'orgs'
-    * 'name': `dummy placeholder`
-    * 'dba': `dummy placeholder`
-    * 'address': `dummy placeholder`
-    * 'address2': `dummy placeholder`
-    * 'city': `dummy placeholder`
-    * 'province': 'BC'
-    * 'postalcode': '1A1 A1A'
-    * 'fullAddress': `dummy placeholder`
-    * 'contactName': `dummy placeholder`
-    * 'contactEmail': 'bcdevelopersexchange@gmail.com'
-    * 'contactPhone': `dummy placeholder`
-    * 'website': ''
-    * 'orgImageURL': ''
-* 'profiles'
-    * 'github': ''
-    * 'stackOverflow': ''
-    * 'stackExchange': ''
-    * 'linkedIn': ''
-    * 'website': ''
-* 'programs'
-    * 'owner': ''
-* 'proposals'
-    * 'businessName': `dummy placeholder`
-    * 'businessAddress': `dummy placeholder`
-    * 'businessContactName': `dummy placeholder`
-    * 'businessContactEmail': `dummy placeholder`
-    * 'businessContactPhone': `dummy placeholder`
-* 'users'
-    * 'firstName': `dummy placeholder`
-    * 'lastName': `dummy placeholder`
-    * 'displayName': `dummy placeholder`
-    * 'username': `dummy placeholder`
-    * 'email': 'bcdevelopersexchange@gmail.com'
-    * 'address': `dummy placeholder`
-    * 'phone': `dummy placeholder`
-    * 'businessAddress2': `dummy placeholder`
-    * 'businessCity': `dummy placeholder`
-    * 'businessProvince': 'BC'
-    * 'businessCode': ''
-    * 'profileImageURL': ''
-    * 'providerData': '
-    * 'businessName': `dummy placeholder`
-    * 'businessAddress': `dummy placeholder`
-    * 'businessContactName': `dummy placeholder`
-    * 'businessContactEmail': `dummy placeholder`
-    * 'businessContactPhone': `dummy placeholder`
-    * 'github': ''
-    * 'stackOverflow': ''
-    * 'stackExchange': ''
-    * 'linkedIn': ''
-    * 'website': ''
+**Warning:** Importing will drop the configured database at `DB_URI` and 
+replace it with the newly uploaded, and likely scrubbed, content. If you want
+to ensure this is not possible, and make the application export-only, configure 
+Mongo permissions such that the user in `DB_URI` has read-only permission.

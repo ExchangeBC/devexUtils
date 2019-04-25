@@ -22,7 +22,7 @@ async function restore(loc, uri) {
   const db = url.parse(uri).pathname.substr(1)
   const command = `
     mongorestore \
-      --uri ${uri} \
+      --uri '${uri}' \
       --nsFrom '$db$.$col$' \
       --nsTo '${db}.$col$' \
       --archive=${loc} \
@@ -39,7 +39,7 @@ async function restore(loc, uri) {
 async function dump(uri, loc) {
   const command = `
     mongodump \
-      --uri ${uri} \
+      --uri '${uri}' \
       --archive=${loc} \
       --gzip
   `

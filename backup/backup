@@ -12,3 +12,4 @@ mongodump \
   --gzip \
   --uri $MONGODB_URI \
   --archive="/backups/backup-$(date '+%u (%Y-%m-%dT%H:%M:%S)').gz"
+  --readPreference primary

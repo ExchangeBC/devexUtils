@@ -11,11 +11,13 @@ if test -f /backups/backup-$(date '+%u')*; then
   mv /backups/backup-$(date '+%u')* /backups/backup-prev-week
 fi
 
+BACKUP_NAME=/backups/backup-$(date '+%u (%Y-%m-%dT%H:%M:%S)').gz
+
 mongodump \
   --gzip \
   --uri $MONGODB_URI \
-  --archive="/backups/backup-$(date '+%u (%Y-%m-%dT%H:%M:%S)').gz"
+  --archive="$BACKUP_NAME"
 
-if test -f "/backups/backup-$(date '+%u (%Y-%m-%dT%H:%M:%S)').gz"; then
+if test -f "$BACKUP_NAME"; then
   rm /backups/backup-prev-week
 fi

@@ -6,7 +6,7 @@ echo Backup triggered
 
 source /tmp/.envs
 
-# rename previous weeks backup, and then delete after new backup complete
+# rename previous weeks backup, and then delete after new backup succeeds
 if test -f /backups/backup-$(date '+%u')*; then
   mv /backups/backup-$(date '+%u')* /backups/backup-prev-week
 fi
@@ -16,6 +16,6 @@ mongodump \
   --uri $MONGODB_URI \
   --archive="/backups/backup-$(date '+%u (%Y-%m-%dT%H:%M:%S)').gz"
 
-if test -f /backups/backup-prev-week; then
+if test -f "/backups/backup-$(date '+%u (%Y-%m-%dT%H:%M:%S)').gz"; then
   rm /backups/backup-prev-week
 fi

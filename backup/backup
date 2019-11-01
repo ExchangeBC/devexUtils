@@ -6,9 +6,12 @@ echo Backup triggered
 
 source /tmp/.envs
 
-rm /backups/backup-$(date '+%u')* 2> /dev/null
+# rename previous weeks backup, and then delete after new backup complete
+mv /backups/backup-$(date '+%u')* /backups/backup-prev-week
 
 mongodump \
   --gzip \
   --uri $MONGODB_URI \
   --archive="/backups/backup-$(date '+%u (%Y-%m-%dT%H:%M:%S)').gz"
+
+rm /backups/backup-prev-week
